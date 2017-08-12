@@ -1,0 +1,5 @@
+%ul
+  - locals[:files].each do |file|
+    %li
+      %a{ :href => "/files/#{file.name}" } 
+        = file.name
