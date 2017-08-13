@@ -32,6 +32,10 @@ class AppTest < Minitest::Test
 
   def test_non_existing_file_page
     get '/files/non-existing-file'
-    assert_equal 404, last_response.status
+    assert_equal 302, last_response.status
+
+    get last_response['Location']
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, 'File not found'
   end
 end
