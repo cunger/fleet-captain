@@ -16,6 +16,7 @@ GEM
     rack-test (0.7.0)
       rack (>= 1.0, < 3)
     rake (12.0.0)
+    redcarpet (3.4.0)
     sinatra (2.0.0)
       mustermann (~> 1.0)
       rack (~> 2.0)
@@ -43,6 +44,7 @@ DEPENDENCIES
   minitest
   rack-test
   rake
+  redcarpet
   sinatra
   sinatra-contrib
   thin

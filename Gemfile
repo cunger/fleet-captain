@@ -7,6 +7,7 @@ gem 'rake'
 gem 'sinatra'
 gem 'thin'
 gem 'haml'
+gem 'redcarpet'
 
 group :development do
   gem 'sinatra-contrib'

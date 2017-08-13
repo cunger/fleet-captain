@@ -24,7 +24,7 @@ enable :sessions
 
 before do
   @context = { :files => @@file_system.files,
-               :flash => flash || 'none' }
+               :flash => current_flash_message || 'none' }
 end
 
 ####
@@ -44,6 +44,6 @@ end
 
 private
 
-def flash
+def current_flash_message
   session.delete :flash
 end

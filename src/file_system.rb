@@ -14,7 +14,6 @@ module FleetCaptain
     def find(basename)
       @files.select { |file| file.name == basename }
             .fetch(0) { yield if block_given? }
-      # TODO return NullFileCache if !block_given?
     end
 
     private
@@ -26,7 +25,7 @@ module FleetCaptain
 
         entry = path + '/' + entry
 
-        files << FileCache.new(entry) if File.file?(entry)
+        files << FileCache.create(entry) if File.file?(entry)
         files += all_files_in(entry) if File.directory?(entry)
       end
       files
