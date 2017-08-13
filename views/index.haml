@@ -1,5 +1,7 @@
+= haml :"flash_messages/_#{@context[:flash]}", :layout => false
+
 %ul
-  - locals[:files].each do |file|
+  - @context[:files].each do |file|
     %li
-      %a{ :href => "/files/#{file.name}" } 
+      %a{ :href => "/files/#{file.name}" }
         = file.name

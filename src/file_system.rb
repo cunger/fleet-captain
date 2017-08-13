@@ -14,6 +14,7 @@ module FleetCaptain
     def find(basename)
       @files.select { |file| file.name == basename }
             .fetch(0) { yield if block_given? }
+      # TODO return NullFileCache if !block_given?
     end
 
     private

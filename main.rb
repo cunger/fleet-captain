@@ -9,26 +9,41 @@ configure do
   set :server, 'thin'
 end
 
+enable :sessions
+
 ## Set up file system
 
 @@file_system = FleetCaptain::FileSystem.new
 
 #### Routes ####
 
-# GET '/' => file index
+# GET '/'            => file index
+# GET '/files/:name' => show content of a specific file
+
+####
+
+before do
+  @context = { :files => @@file_system.files,
+               :flash => flash || 'none' }
+end
 
 ####
 
 get '/' do
-  haml :index, :locals => { :files => @@file_system.files }
+  haml :index
 end
 
 get '/files/:file_name' do |file_name|
-  file = @@file_system.find(file_name) { halt 404 }
+  file = @@file_system.find(file_name) do
+    session[:flash] = 'filenotfound'
+    redirect '/'
+  end
   content_type file.content_type
   file.content
 end
 
-not_found do
-  haml :file_not_found 
+private
+
+def flash
+  session.delete :flash
 end
