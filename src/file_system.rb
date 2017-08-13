@@ -4,8 +4,6 @@ module FleetCaptain
   BASEPATH = 'files'
   IGNORE = ['.', '..']
 
-  class FileDoesNotExistError < RuntimeError; end
-
   class FileSystem
     attr_reader :files
 
@@ -15,7 +13,7 @@ module FleetCaptain
 
     def find(basename)
       @files.select { |file| file.name == basename }
-            .fetch(0) { raise FileDoesNotExistError }
+            .fetch(0) { yield if block_given? }
     end
 
     private

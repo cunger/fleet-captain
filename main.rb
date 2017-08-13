@@ -24,7 +24,11 @@ get '/' do
 end
 
 get '/files/:file_name' do |file_name|
-  file = @@file_system.find(file_name)
+  file = @@file_system.find(file_name) { halt 404 }
   content_type file.content_type
   file.content
+end
+
+not_found do
+  haml :file_not_found 
 end
