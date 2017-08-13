@@ -3,7 +3,9 @@ require_relative '../src/file_system'
 
 class FileSystemTest < Minitest::Test
   def test_all_files
-     assert_equal ['about.txt', 'changes.txt', 'history.txt'],
-                  FleetCaptain::FileSystem.new.files.map(&:name)
+    files = FleetCaptain::FileSystem.new.files.map(&:name)
+    ['about.txt', 'changes.txt', 'history.txt', 'example.md'].each do |file| 
+      assert_includes files, file
+    end
   end
 end

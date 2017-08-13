@@ -19,9 +19,10 @@ class AppTest < Minitest::Test
     assert_includes last_response.body, 'about.txt'
     assert_includes last_response.body, 'changes.txt'
     assert_includes last_response.body, 'history.txt'
+    assert_includes last_response.body, 'example.md'
   end
 
-  def test_file_pages
+  def test_text_files
     ['about.txt', 'changes.txt', 'history.txt'].each do |file_name|
       get "/files/#{file_name}"
       assert_equal 200, last_response.status
@@ -30,12 +31,20 @@ class AppTest < Minitest::Test
     end
   end
 
-  def test_non_existing_file_page
+  def test_non_existing_file
     get '/files/non-existing-file'
     assert_equal 302, last_response.status
 
     get last_response['Location']
     assert_equal 200, last_response.status
     assert_includes last_response.body, 'File not found'
+  end
+
+  def test_render_markdown
+    get '/files/example.md'
+
+    assert_equal 200, last_response.status
+    assert_equal 'text/html;charset=utf-8', last_response['Content-Type']
+    assert_includes last_response.body, '<h1>An h1 header</h1>'
   end
 end

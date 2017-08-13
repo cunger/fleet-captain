@@ -1,3 +1,5 @@
+require 'redcarpet'
+
 module FleetCaptain
 
   class FileNotFoundError < RuntimeError; end
@@ -50,7 +52,7 @@ module FleetCaptain
     end
 
     def content_type
-      'text/markdown'
+      'text/html'
     end
 
     def content
