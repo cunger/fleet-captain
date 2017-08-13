@@ -1,4 +1,4 @@
-require_relative 'file'
+require_relative 'file_cache'
 
 module FleetCaptain
   BASEPATH = 'files'
@@ -12,7 +12,6 @@ module FleetCaptain
     def initialize
       @files = all_files_in BASEPATH
     end
-    alias_method :load, :initalize
 
     def find(basename)
       @files.select { |file| file.name == basename }
@@ -28,8 +27,8 @@ module FleetCaptain
 
         entry = path + '/' + entry
 
-        files << FleetCaptain::File.new(entry) if ::File.file?(entry)
-        files += all_files_in(entry) if ::File.directory?(entry)
+        files << FileCache.new(entry) if File.file?(entry)
+        files += all_files_in(entry) if File.directory?(entry)
       end
       files
     end

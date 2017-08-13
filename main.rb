@@ -11,7 +11,7 @@ end
 
 ## Set up file system
 
-@@file_system = FleetCaptain::FileSystem.load
+@@file_system = FleetCaptain::FileSystem.new
 
 #### Routes ####
 
