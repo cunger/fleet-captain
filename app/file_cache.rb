@@ -7,7 +7,7 @@ module FleetCaptain
   # Basic files, treated as plain text. Used for text files and also
   # serves as fallback for all unknown file extensions.
   class PlainFileCache
-    attr_reader :path
+    attr_reader :path, :raw_content
 
     def initialize(path)
       raise FileNotFoundError if !File.exist?(path)
@@ -28,9 +28,10 @@ module FleetCaptain
       raw_content
     end
 
-    protected
-
-    attr_reader :raw_content
+    def content=(text)
+      @raw_content = text
+      File.write path, raw_content
+    end
   end
 
   class HTMLFileCache < PlainFileCache
@@ -56,7 +57,7 @@ module FleetCaptain
     end
 
     def content
-      @markdown.render @raw_content
+      @markdown.render raw_content
     end
   end
 

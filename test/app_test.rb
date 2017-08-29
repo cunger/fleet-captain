@@ -3,7 +3,7 @@ ENV['RACK_ENV'] = 'test'
 require 'minitest/autorun'
 require 'rack/test'
 
-require_relative '../main'
+require_relative '../fleet_captain'
 
 class AppTest < Minitest::Test
   include Rack::Test::Methods
@@ -27,7 +27,6 @@ class AppTest < Minitest::Test
       get "/files/#{file_name}"
       assert_equal 200, last_response.status
       assert_equal 'text/plain;charset=utf-8', last_response['Content-Type']
-      assert_equal "This is #{file_name}", last_response.body.strip
     end
   end
 
@@ -45,6 +44,17 @@ class AppTest < Minitest::Test
 
     assert_equal 200, last_response.status
     assert_equal 'text/html;charset=utf-8', last_response['Content-Type']
-    assert_includes last_response.body, '<h1>An h1 header</h1>'
+  end
+
+  def test_edit_route
+    get '/files/changes.txt/edit'
+    assert_equal 200, last_response.status
+
+    # Note: This changes the file in the file system, which is not wanted!
+    post '/files/changes.txt/edit', content: 'This file has been changed'
+    assert_equal 302, last_response.status
+    get last_response['Location']
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, "'changes.txt' was updated"
   end
 end

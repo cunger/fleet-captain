@@ -1,7 +1,10 @@
-= haml :"flash_messages/_#{@context[:flash]}", :layout => false
+.flash
+  = current_flash_message
 
 %ul
-  - @context[:files].each do |file|
+  - @files.each do |file|
     %li
-      %a{ :href => "/files/#{file.name}" }
+      %a(href="/files/#{file.name}")
         = file.name
+      %a(href="/files/#{file.name}/edit")
+        %img(src="images/edit.png" height="20px")
