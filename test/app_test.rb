@@ -16,17 +16,19 @@ class AppTest < Minitest::Test
     get '/'
     assert_equal 200, last_response.status
     assert_equal 'text/html;charset=utf-8', last_response['Content-Type']
-    assert_includes last_response.body, 'about.txt'
-    assert_includes last_response.body, 'changes.txt'
-    assert_includes last_response.body, 'history.txt'
-    assert_includes last_response.body, 'example.md'
+
+    # displays all files in the directory
+    file_system = FleetCaptain::FileSystem.new
+    file_system.files.each do |file|
+      assert_includes last_response.body, file.name
+    end
   end
 
-  def test_text_files
-    ['about.txt', 'changes.txt', 'history.txt'].each do |file_name|
-      get "/files/#{file_name}"
+  def test_file_routes
+    file_system = FleetCaptain::FileSystem.new
+    file_system.files.each do |file|
+      get "/files/#{file.name}"
       assert_equal 200, last_response.status
-      assert_equal 'text/plain;charset=utf-8', last_response['Content-Type']
     end
   end
 
@@ -40,7 +42,7 @@ class AppTest < Minitest::Test
   end
 
   def test_render_markdown
-    get '/files/example.md'
+    get '/files/test.md'
 
     assert_equal 200, last_response.status
     assert_equal 'text/html;charset=utf-8', last_response['Content-Type']
@@ -56,5 +58,16 @@ class AppTest < Minitest::Test
     get last_response['Location']
     assert_equal 200, last_response.status
     assert_includes last_response.body, "'changes.txt' was updated"
+  end
+
+  def test_create_new_file
+    get '/files/new'
+    assert_equal 200, last_response.status
+
+    post '/files/new', name: 'new_file'
+    assert_equal 302, last_response.status
+    get last_response['Location']
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, "'new_file' was created"
   end
 end

@@ -1,3 +1,5 @@
+ENV['RACK_ENV'] = 'test'
+
 require 'minitest/autorun'
 require_relative '../app/file_cache'
 
@@ -25,7 +27,7 @@ class FileCacheTest < Minitest::Test
     changes_txt.content = str
     # Change is reflected in content
     assert_equal str, changes_txt.content.strip
-    # Change is stored in the file 
+    # Change is stored in the file
     changes_txt = FleetCaptain::FileCache.create 'test/files/changes.txt'
     assert_equal str, changes_txt.content.strip
   end

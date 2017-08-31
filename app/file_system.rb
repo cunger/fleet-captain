@@ -1,29 +1,31 @@
 require_relative 'file_cache'
 
 module FleetCaptain
-  BASEPATH = 'files'
   IGNORE = ['.', '..']
+  BASEPATH = ENV['RACK_ENV'] == 'test' ? 'test/files' : 'files'
 
   class FileSystem
-    attr_reader :files
+    attr_reader :path
 
-    def initialize
-      @files = all_files_in BASEPATH
+    def initialize(path=BASEPATH)
+      @path = path
     end
 
-    def find(basename)
-      @files.select { |file| file.name == basename }
-            .fetch(0) { yield if block_given? }
+    def create(name)
+      FileUtils.touch [@path + '/' + name]
     end
 
-    private
+    def find(name)
+      files.select { |file| file.name == name }
+           .fetch(0) { yield if block_given? }
+    end
 
-    def all_files_in(path)
+    def files
       files = []
-      Dir.entries(path).each do |entry|
+      Dir.entries(@path).each do |entry|
         next if IGNORE.include?(entry)
 
-        entry = path + '/' + entry
+        entry = @path + '/' + entry
 
         files << FileCache.create(entry) if File.file?(entry)
         files += all_files_in(entry) if File.directory?(entry)

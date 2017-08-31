@@ -1,11 +1,39 @@
+ENV['RACK_ENV'] = 'test'
+
 require 'minitest/autorun'
 require_relative '../app/file_system'
 
 class FileSystemTest < Minitest::Test
-  def test_all_files
-    files = FleetCaptain::FileSystem.new.files.map(&:name)
-    ['about.txt', 'changes.txt', 'history.txt', 'example.md'].each do |file|
-      assert_includes files, file
+  def test_path
+    assert_equal 'files',      FleetCaptain::FileSystem.new('files').path
+    assert_equal 'test/files', FleetCaptain::FileSystem.new.path
+  end
+
+  def test_files
+    compare_files 'files'
+    compare_files 'test/files'
+  end
+
+  def test_create_and_find_file
+    file_system = FleetCaptain::FileSystem.new
+    # create file
+    file_name = 'created.txt'
+    file_system.create file_name
+    # look at it
+    file = file_system.find file_name
+    refute_nil file
+    assert_equal file_name, file.name
+    assert file.content.strip.empty?
+  end
+
+  private
+
+  def compare_files(dir)
+    files_from_disk = Dir.entries dir
+    files_from_capt = FleetCaptain::FileSystem.new(dir).files
+    files_from_capt.each do |file|
+      assert_includes files_from_disk, file.name
     end
+    refute !files_from_disk.empty? && files_from_capt.empty?
   end
 end

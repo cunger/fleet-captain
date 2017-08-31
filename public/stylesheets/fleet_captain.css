@@ -1,0 +1,13 @@
+* {
+  font-family: 'PT Sans', sans-serif;
+  padding: 10;
+}
+
+a {
+  text-decoration: none;
+}
+
+#flash {
+  background-color: #ffff00;
+  padding: 4;
+}
