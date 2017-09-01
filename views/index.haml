@@ -6,6 +6,9 @@
         (SHOW)
       %a(href="/files/#{file.name}/edit")
         (EDIT)
+      %form(method="post" action="/files/#{file.name}/delete" class="inline")
+        %button(type="submit" name="delete")
+          DELETE
 
 %a(href="/files/new")
   + NEW

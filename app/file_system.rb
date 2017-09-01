@@ -15,6 +15,10 @@ module FleetCaptain
       FileUtils.touch [@path + '/' + name]
     end
 
+    def delete(name)
+      FileUtils.rm [@path + '/' + name]
+    end
+
     def find(name)
       files.select { |file| file.name == name }
            .fetch(0) { yield if block_given? }

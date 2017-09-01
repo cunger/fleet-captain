@@ -74,6 +74,15 @@ post '/files/:file_name/edit' do |file_name|
   redirect '/'
 end
 
+# Delete file
+
+post '/files/:file_name/delete' do |file_name|
+  @file_system.delete file_name
+  
+  session[:flash] = "'#{file_name}' was deleted."
+  redirect '/'
+end
+
 ## Helpers
 
 helpers do

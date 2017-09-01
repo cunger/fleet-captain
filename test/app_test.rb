@@ -48,7 +48,7 @@ class AppTest < Minitest::Test
     assert_equal 'text/html;charset=utf-8', last_response['Content-Type']
   end
 
-  def test_edit_route
+  def test_edit_file
     get '/files/changes.txt/edit'
     assert_equal 200, last_response.status
 
@@ -69,5 +69,24 @@ class AppTest < Minitest::Test
     get last_response['Location']
     assert_equal 200, last_response.status
     assert_includes last_response.body, "'new_file' was created"
+  end
+
+  def test_delete_file
+    # create it
+    get '/files/new'
+    assert_equal 200, last_response.status
+    post '/files/new', name: 'new_file'
+    assert_equal 302, last_response.status
+    # delete it
+    post '/files/new_file/delete'
+    assert_equal 302, last_response.status
+    get last_response['Location']
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, "'new_file' was deleted"
+    # check it's gone
+    get '/files/new_file'
+    assert_equal 302, last_response.status
+    get last_response['Location']
+    assert_includes last_response.body, 'File not found'
   end
 end

@@ -26,6 +26,21 @@ class FileSystemTest < Minitest::Test
     assert file.content.strip.empty?
   end
 
+  def test_delete_file
+    file_system = FleetCaptain::FileSystem.new
+    # create file
+    file_name = 'temporary.txt'
+    file_system.create file_name
+    # check it's there
+    file = file_system.find file_name
+    refute_nil file
+    # delete it again
+    file_system.delete file_name
+    # chec it's not there anymore
+    file = file_system.find file_name
+    assert_nil file 
+  end
+
   private
 
   def compare_files(dir)

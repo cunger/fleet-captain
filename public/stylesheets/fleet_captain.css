@@ -7,6 +7,10 @@ a {
   text-decoration: none;
 }
 
+form.inline {
+  display: inline;
+}
+
 #flash {
   background-color: #ffff00;
   padding: 4;
