@@ -3,12 +3,12 @@
 
   %head
     %title Fleet Captain
-    %link(rel="stylesheet" href="stylesheets/fleet_captain.css")
+    %link(rel="stylesheet" href="/stylesheets/fleet_captain.css")
     %link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata|PT+Sans")
 
   %body
 
-    #flash
-      = current_flash_message
+    = haml :_user,  :layout => false
+    = haml :_flash, :layout => false
 
     = yield

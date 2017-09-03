@@ -8,6 +8,7 @@ gem 'sinatra'
 gem 'thin'
 gem 'haml'
 gem 'redcarpet'
+gem 'sysrandom'
 
 group :development do
   gem 'sinatra-contrib'

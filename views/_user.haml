@@ -1,0 +1,12 @@
+#user
+  - if @user.signed_in?
+    Signed in as #{@user.name} |
+    %form(method="post" action="/user/signout" class="inline")
+      %button(type="submit" name="signout")
+        SIGN OUT
+  - else
+    Browsing as guest |
+    %a(href="/user/signin")
+      SIGN IN
+
+%br
