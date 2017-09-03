@@ -84,7 +84,7 @@ class AppTest < Minitest::Test
     post_is_ok '/user/signin',
                with: TEST_USER,
                destination_includes: "Signed in as #{TEST_USER[:name]}"
-    assert_equal 'test', session[:user]
+    assert_equal 'gary', session[:user]
   end
 
   def test_unsuccessful_sign_in
@@ -121,29 +121,29 @@ class AppTest < Minitest::Test
 
   private
 
-  TEST_USER  = { name: 'test', password: '1234' }
-  WRONG_NAME = { name: 'none', password: '1234' }
-  WRONG_PASS = { name: 'test', password: '5678' }
+  TEST_USER  = { name: 'gary', password: 'anderson' }
+  WRONG_NAME = { name: 'none', password: 'anderson' }
+  WRONG_PASS = { name: 'gary', password: '1234' }
 
   def session
     last_request.env['rack.session']
   end
 
   def get_is_ok(path)
-    get path, {}, { 'rack.session' => { user: 'test' } }
+    get path, {}, { 'rack.session' => { user: 'gary' } }
     assert_equal 200, last_response.status
     yield if block_given?
   end
 
   def get_redirects(path, destination_includes: '')
-    get path, {}, { 'rack.session' => { user: 'test' } }
+    get path, {}, { 'rack.session' => { user: 'gary' } }
     assert_equal 302, last_response.status
     get last_response['Location']
     assert_includes last_response.body, destination_includes
   end
 
   def post_is_ok(path, with: {}, destination_includes: '')
-    post path, with, { 'rack.session' => { user: 'test' } }
+    post path, with, { 'rack.session' => { user: 'gary' } }
     assert_equal 302, last_response.status
     get last_response['Location']
     assert_equal 200, last_response.status

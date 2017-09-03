@@ -20,10 +20,8 @@ set :session_secret, ENV.fetch('SESSION_SECRET') { SecureRandom.hex(64) }
 before do
   @file_system = FleetCaptain::FileSystem.new
 
-  @users  = FleetCaptain::Users.new
-  @users << FleetCaptain::User.new('test', '1234')
-
-  @user = @users.fetch(session[:user]) { FleetCaptain::GuestUser.new }
+  @users = FleetCaptain::Users.new
+  @user  = @users.fetch(session[:user]) { FleetCaptain::GuestUser.new }
 end
 
 #### Routes ####

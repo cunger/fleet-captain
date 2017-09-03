@@ -2,11 +2,13 @@ GEM
   remote: https://rubygems.org/
   specs:
     backports (3.8.0)
+    bcrypt (3.1.11)
     daemons (1.2.4)
     eventmachine (1.2.5)
     haml (5.0.2)
       temple (>= 0.8.0)
       tilt
+    json (2.0.2)
     minitest (5.10.3)
     multi_json (1.12.1)
     mustermann (1.0.0)
@@ -41,9 +43,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  bcrypt
   haml
+  json
   minitest
-  rack-protection
   rack-test
   rake
   redcarpet

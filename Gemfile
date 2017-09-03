@@ -7,8 +7,12 @@ gem 'rake'
 gem 'sinatra'
 gem 'thin'
 gem 'haml'
-gem 'redcarpet'
+
 gem 'sysrandom'
+gem 'bcrypt'
+
+gem 'redcarpet'
+gem 'json'
 
 group :development do
   gem 'sinatra-contrib'

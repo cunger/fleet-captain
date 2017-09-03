@@ -1,3 +1,8 @@
+ENV['DIR'] = File.expand_path(File.dirname(__FILE__))
+
+require 'bcrypt'
+require 'json'
+
 module FleetCaptain
 
   class NameAlreadyTaken < RuntimeError ; end
@@ -6,7 +11,8 @@ module FleetCaptain
 
   class Users
     def initialize
-      @users = []
+      json = JSON.parse File.read(ENV['DIR'] + '/users.json')
+      @users = json.map { |name, pwd| User.new(name, pwd) }
     end
 
     def <<(new_user)
@@ -28,21 +34,34 @@ module FleetCaptain
     end
   end
 
+  #
+  # A user is uniquely identifiable by @name.
+  #
   class User
     attr_reader :name
 
     def initialize(name, password)
       @name = name
-      @password = password
+      @password = password 
     end
 
-    def validate(password)
-      raise PasswordNotCorrect unless @password == password
+    def validate(alleged_password)
+      raise PasswordNotCorrect unless password == alleged_password
       true
     end
 
     def signed_in?
       true
+    end
+
+    def ==(other)
+      name == other.name
+    end
+
+    private
+
+    def password
+      BCrypt::Password.new @password
     end
   end
 
