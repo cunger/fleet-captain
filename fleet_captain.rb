@@ -5,31 +5,27 @@ require 'sysrandom/securerandom'
 require_relative 'app/file_system'
 require_relative 'app/users'
 
-#### Configure Sinatra ####
 
 configure do
+  enable :sessions
+  set :session_secret, ENV.fetch('SESSION_SECRET') { SecureRandom.hex(64) }
   set :server, 'thin'
 end
 
-enable :sessions
-
-set :session_secret, ENV.fetch('SESSION_SECRET') { SecureRandom.hex(64) }
-
-#### Set up file system and users ####
-
 before do
-  @file_system = FleetCaptain::FileSystem.new
-
+  # Set up file system
+  dir = File.join(settings.root, settings.environment == :test ? 'test/files' : 'files')
+  @file_system = FleetCaptain::FileSystem.new(dir)
+  # Set up user management
   @users = FleetCaptain::Users.new
-  @user  = @users.fetch(session[:user]) { FleetCaptain::GuestUser.new }
+  @user = @users.fetch(session[:user]) { FleetCaptain::GuestUser.new }
 end
 
 #### Routes ####
 
-# File index
+# Show file index
 
 get '/' do
-  @files = @file_system.files
   haml :index
 end
 
@@ -37,11 +33,13 @@ end
 
 get '/files/new' do
   restrict_to_signed_in_user
+
   haml :create
 end
 
 post '/files/new' do
   restrict_to_signed_in_user
+
   file_name = params['name']
   if file_name.strip.empty?
     redirect_with_message '/files/new', 'Please enter a name for the document.'
@@ -54,14 +52,13 @@ end
 # Show content of a file
 
 get '/files/:file_name' do |file_name|
-  file = find file_name
-
+  file = fetch file_name
   case file.content_type
-  when 'text/plain'
+  when 'text/html'
+    include_in_layout file.content
+  else
     content_type 'text/plain'
     file.content
-  else
-    haml(:layout, { layout: false}) { file.content }
   end
 end
 
@@ -69,15 +66,16 @@ end
 
 get '/files/:file_name/edit' do |file_name|
   restrict_to_signed_in_user
-  @file = find file_name
+
+  @file = fetch file_name
   haml :edit
 end
 
 post '/files/:file_name/edit' do |file_name|
   restrict_to_signed_in_user
-  file = find file_name
-  file.content = params['content']
 
+  file = fetch file_name
+  file.content = params['content']
   redirect_with_message '/', "'#{file_name}' was updated."
 end
 
@@ -85,6 +83,7 @@ end
 
 post '/files/:file_name/delete' do |file_name|
   restrict_to_signed_in_user
+
   @file_system.delete file_name
   redirect_with_message '/', "'#{file_name}' was deleted."
 end
@@ -118,7 +117,7 @@ post '/user/signout' do
   redirect_with_message '/', 'You have been signed out.'
 end
 
-## Helpers
+#### Helpers ####
 
 helpers do
   def current_flash_message
@@ -132,8 +131,10 @@ end
 
 private
 
-def find(file_name)
-  @file_system.find(file_name) { redirect_with_message '/', 'File not found.' }
+def fetch(file_name)
+  @file_system.find file_name
+rescue FleetCaptain::FileNotFoundError
+  redirect_with_message '/', 'File not found.'
 end
 
 def redirect_with_message(path, message)
@@ -142,10 +143,14 @@ def redirect_with_message(path, message)
 end
 
 def restrict_to_signed_in_user
-  deny_access unless @user.signed_in?
+  deny_access 'You need to be signed in to do this.' unless @user.signed_in?
 end
 
-def deny_access(message='You need to be signed in to do this.')
+def deny_access(message)
   session[:flash] = message
   halt 403, haml(:signin)
+end
+
+def include_in_layout(content)
+  haml(:layout, { layout: false}) { content }
 end

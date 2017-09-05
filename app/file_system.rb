@@ -1,40 +1,42 @@
-require_relative 'file_cache'
+require_relative 'file_wrapper'
 
 module FleetCaptain
-  IGNORE = ['.', '..']
-  BASEPATH = ENV['RACK_ENV'] == 'test' ? 'test/files' : 'files'
+  class FileNotFoundError < RuntimeError ; end
 
   class FileSystem
     attr_reader :path
 
-    def initialize(path=BASEPATH)
-      @path = path
+    def initialize(path)
+      @path = with_trailing_slash path
     end
 
     def create(name)
-      FileUtils.touch [@path + '/' + name]
+      FileUtils.touch [path + name]
     end
 
     def delete(name)
-      FileUtils.rm [@path + '/' + name]
+      if_file_exists(name) { |file| FileUtils.rm [file] }
     end
 
     def find(name)
-      files.select { |file| file.name == name }
-           .fetch(0) { yield if block_given? }
+      if_file_exists(name) { |file| FileWrapper.create file }
     end
 
     def files
-      files = []
-      Dir.entries(@path).each do |entry|
-        next if IGNORE.include?(entry)
+      Dir.entries(path)
+         .select { |entry| File.file? path+entry }
+         .reject { |entry| entry.start_with? '.' }
+    end
 
-        entry = @path + '/' + entry
+    private
 
-        files << FileCache.create(entry) if File.file?(entry)
-        files += all_files_in(entry) if File.directory?(entry)
-      end
-      files
+    def with_trailing_slash(str)
+      str.end_with?('/') ? str : str + '/'
+    end
+
+    def if_file_exists(name, &block)
+      raise FileNotFoundError unless File.exist?(path + name)
+      block.call(path + name)
     end
   end
 end

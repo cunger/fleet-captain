@@ -1,13 +1,13 @@
 %ul
-  - @files.each do |file|
+  - @file_system.files.each do |file|
     %li
-      = file.name
-      %a(href="/files/#{file.name}")
+      = file
+      %a(href="/files/#{file}")
         (SHOW)
       - if @user.signed_in?
-        %a(href="/files/#{file.name}/edit")
+        %a(href="/files/#{file}/edit")
           (EDIT)
-        %form(method="post" action="/files/#{file.name}/delete" class="inline")
+        %form(method="post" action="/files/#{file}/delete" class="inline")
           %button(type="submit" name="delete")
             DELETE
 

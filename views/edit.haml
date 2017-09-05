@@ -3,7 +3,7 @@
 
 %form(action="/files/#{@file.name}/edit" method="post")
   %textarea(cols="50" rows="10" id="content" name="content")
-    = @file.raw_content
+    = @file.content
   %button(type="submit")
     Save
   %button(type="reset")

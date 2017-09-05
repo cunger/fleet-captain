@@ -4,51 +4,53 @@ require 'minitest/autorun'
 require_relative '../app/file_system'
 
 class FileSystemTest < Minitest::Test
-  def test_path
-    assert_equal 'files',      FleetCaptain::FileSystem.new('files').path
-    assert_equal 'test/files', FleetCaptain::FileSystem.new.path
+  TEST_FILES = ['test.txt', 'test.md']
+
+  def teardown
+    # Clean up file system on disk
+    # by removing all temporarily created files
+    temp_files = files_on_disk - TEST_FILES
+    temp_files.each do |f|
+      path = test_files_dir + f
+      FileUtils.rm [path] if File.exist? path
+    end
   end
 
   def test_files
-    compare_files 'files'
-    compare_files 'test/files'
+    assert_equal files_on_disk.sort, test_file_system.files.sort
   end
 
-  def test_create_and_find_file
-    file_system = FleetCaptain::FileSystem.new
-    # create file
-    file_name = 'created.txt'
-    file_system.create file_name
-    # look at it
-    file = file_system.find file_name
-    refute_nil file
-    assert_equal file_name, file.name
-    assert file.content.strip.empty?
-  end
+  def test_create_and_delete_file
+    file_system = test_file_system
+    file_name = 'temp.txt'
 
-  def test_delete_file
-    file_system = FleetCaptain::FileSystem.new
-    # create file
-    file_name = 'temporary.txt'
     file_system.create file_name
-    # check it's there
-    file = file_system.find file_name
-    refute_nil file
-    # delete it again
+
+    assert File.exist?(test_files_dir + file_name),
+      "The file system was told to create #{file_name}, but it doesn't exist."
+    refute_nil file_system.find(file_name)
+
     file_system.delete file_name
-    # chec it's not there anymore
-    file = file_system.find file_name
-    assert_nil file 
+
+    refute File.exist?(test_files_dir + file_name),
+      "The file system was told to delete #{file_name}, but it's still there."
+    assert_raises FleetCaptain::FileNotFoundError do
+      file_system.find(file_name)
+    end
   end
 
   private
 
-  def compare_files(dir)
-    files_from_disk = Dir.entries dir
-    files_from_capt = FleetCaptain::FileSystem.new(dir).files
-    files_from_capt.each do |file|
-      assert_includes files_from_disk, file.name
-    end
-    refute !files_from_disk.empty? && files_from_capt.empty?
+  def test_files_dir
+    File.dirname(__FILE__) + '/files/'
+  end
+
+  def test_file_system
+    FleetCaptain::FileSystem.new(test_files_dir)
+  end
+
+  def files_on_disk
+    Dir.entries(test_files_dir)
+       .reject { |f| f.start_with? '.' }
   end
 end
