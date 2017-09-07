@@ -24,18 +24,18 @@ class FileSystemTest < Minitest::Test
     file_system = test_file_system
     file_name = 'temp.txt'
 
-    file_system.create file_name
+    file_system.create! file_name
 
     assert File.exist?(test_files_dir + file_name),
       "The file system was told to create #{file_name}, but it doesn't exist."
-    refute_nil file_system.find(file_name)
+    refute_nil file_system.fetch(file_name)
 
-    file_system.delete file_name
+    file_system.delete! file_name
 
     refute File.exist?(test_files_dir + file_name),
       "The file system was told to delete #{file_name}, but it's still there."
     assert_raises FleetCaptain::FileNotFoundError do
-      file_system.find(file_name)
+      file_system.fetch file_name
     end
   end
 

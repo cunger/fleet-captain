@@ -1,8 +1,9 @@
 require 'sinatra'
-require 'sinatra/reloader'
+require 'sinatra/reloader' if development?
 require 'sysrandom/securerandom'
 
 require_relative 'app/file_system'
+require_relative 'app/file_wrapper'
 require_relative 'app/users'
 
 
@@ -14,8 +15,8 @@ end
 
 before do
   # Set up file system
-  dir = File.join(settings.root, settings.environment == :test ? 'test/files' : 'files')
-  @file_system = FleetCaptain::FileSystem.new(dir)
+  dir = settings.environment == :test ? 'test/files' : 'files'
+  @file_system = FleetCaptain::FileSystem.new File.join(settings.root, dir)
   # Set up user management
   @users = FleetCaptain::Users.new
   @user = @users.fetch(session[:user]) { FleetCaptain::GuestUser.new }
@@ -40,13 +41,17 @@ end
 post '/files/new' do
   restrict_to_signed_in_user
 
-  file_name = params['name']
-  if file_name.strip.empty?
-    redirect_with_message '/files/new', 'Please enter a name for the document.'
-  end
+  begin
+    file_name = params['name']
+    @file_system.create! file_name
+    redirect_with_message '/', "'#{file_name}' was created."
 
-  @file_system.create file_name
-  redirect_with_message '/', "'#{file_name}' was created."
+  rescue FleetCaptain::EmptyFileNameError
+    redirect_with_message '/files/new', 'Please enter a name for the document.'
+  rescue FleetCaptain::UnknownFileExtensionError
+    redirect_with_message '/files/new', "Unknown file format \
+      (expected one of #{FleetCaptain::FileWrapper.file_extensions.join(', ')})."
+  end
 end
 
 # Show content of a file
@@ -84,7 +89,7 @@ end
 post '/files/:file_name/delete' do |file_name|
   restrict_to_signed_in_user
 
-  @file_system.delete file_name
+  @file_system.delete! file_name
   redirect_with_message '/', "'#{file_name}' was deleted."
 end
 
@@ -132,7 +137,7 @@ end
 private
 
 def fetch(file_name)
-  @file_system.find file_name
+  @file_system.fetch file_name
 rescue FleetCaptain::FileNotFoundError
   redirect_with_message '/', 'File not found.'
 end

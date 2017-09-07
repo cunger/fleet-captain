@@ -1,7 +1,9 @@
 require 'redcarpet'
 
 module FleetCaptain
-  class UnknownFileType < RuntimeError ; end
+
+  # The FileWrapper knows about the full path of a file.
+  # It is responsible for accessing and updating the content of that file.
 
   class FileWrapper
     attr_reader :path
@@ -22,6 +24,10 @@ module FleetCaptain
       File.write path, text
     end
   end
+
+  # There is one subclass of FileWrapper for each known file type.
+  # Each subclass is responsible for knowing about the MIME type of the file,
+  # and possibly what processing to do in order to render its content.
 
   class TextFile < FileWrapper
     def content_type
@@ -52,13 +58,13 @@ module FleetCaptain
     end
 
     def content
-      content = File.read path
-      @markdown.render content
+      @markdown.render super
     end
   end
 
   # FileWrapper also serves as factory for creating instances of
   # the appropriate file type, based on the file's extension.
+  
   class FileWrapper
     MAP = { '.txt' => FleetCaptain::TextFile,
              '.md' => FleetCaptain::MarkdownFile,
@@ -66,9 +72,16 @@ module FleetCaptain
            '.html' => FleetCaptain::HTMLFile,
            '.json' => FleetCaptain::JSONFile }
 
-    def self.create(path)
-      MAP.fetch(extension(path)) { raise UnknownFileType }
-         .send(:new, path)
+    def self.wrap(path)
+      MAP[extension(path)].send(:new, path)
+    end
+
+    def self.file_extensions
+      MAP.keys
+    end
+
+    def self.knows_extension_of?(name)
+      file_extensions.include? extension(name)
     end
 
     private

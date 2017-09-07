@@ -5,12 +5,12 @@ require_relative '../app/file_wrapper'
 
 class FileWrapperTest < Minitest::Test
   def test_class_based_on_file_extension
-    assert_instance_of FleetCaptain::TextFile, FleetCaptain::FileWrapper.create('test.txt')
-    assert_instance_of FleetCaptain::TextFile, FleetCaptain::FileWrapper.create('test.TXT')
-    assert_instance_of FleetCaptain::HTMLFile, FleetCaptain::FileWrapper.create('test.htm')
-    assert_instance_of FleetCaptain::HTMLFile, FleetCaptain::FileWrapper.create('test.html')
-    assert_instance_of FleetCaptain::JSONFile, FleetCaptain::FileWrapper.create('test.json')
-    assert_instance_of FleetCaptain::MarkdownFile, FleetCaptain::FileWrapper.create('test.md')
+    assert_instance_of FleetCaptain::TextFile, FleetCaptain::FileWrapper.wrap('test.txt')
+    assert_instance_of FleetCaptain::TextFile, FleetCaptain::FileWrapper.wrap('test.TXT')
+    assert_instance_of FleetCaptain::HTMLFile, FleetCaptain::FileWrapper.wrap('test.htm')
+    assert_instance_of FleetCaptain::HTMLFile, FleetCaptain::FileWrapper.wrap('test.html')
+    assert_instance_of FleetCaptain::JSONFile, FleetCaptain::FileWrapper.wrap('test.json')
+    assert_instance_of FleetCaptain::MarkdownFile, FleetCaptain::FileWrapper.wrap('test.md')
   end
 
   def test_reading_file_content
@@ -38,6 +38,6 @@ class FileWrapperTest < Minitest::Test
   end
 
   def test_file(name)
-    FleetCaptain::FileWrapper.create(test_files_dir + name)
+    FleetCaptain::FileWrapper.wrap(test_files_dir + name)
   end
 end
