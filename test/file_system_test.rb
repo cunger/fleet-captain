@@ -1,41 +1,40 @@
 ENV['RACK_ENV'] = 'test'
 
 require 'minitest/autorun'
-require_relative '../app/file_system'
+require_relative 'test_file_system'
 
 class FileSystemTest < Minitest::Test
-  TEST_FILES = ['test.txt', 'test.md']
+
+  def setup
+    @test = test_file_system
+  end
 
   def teardown
-    # Clean up file system on disk
+    # Clean up test files directory on disk
     # by removing all temporarily created files
-    temp_files = files_on_disk - TEST_FILES
-    temp_files.each do |f|
-      path = test_files_dir + f
-      FileUtils.rm [path] if File.exist? path
-    end
+    @test.clean_up!
   end
 
   def test_files
-    assert_equal files_on_disk.sort, test_file_system.files.sort
+    assert_equal @test.files_on_disk.sort,
+                 @test.file_system.files.sort
   end
 
   def test_create_and_delete_file
-    file_system = test_file_system
     file_name = 'temp.txt'
 
-    file_system.create! file_name
+    @test.file_system.create! file_name
 
     assert File.exist?(test_files_dir + file_name),
       "The file system was told to create #{file_name}, but it doesn't exist."
-    refute_nil file_system.fetch(file_name)
+    refute_nil @test.file_system.fetch(file_name)
 
-    file_system.delete! file_name
+    @test.file_system.delete! file_name
 
     refute File.exist?(test_files_dir + file_name),
       "The file system was told to delete #{file_name}, but it's still there."
     assert_raises FleetCaptain::FileNotFoundError do
-      file_system.fetch file_name
+      @test.file_system.fetch(file_name)
     end
   end
 
@@ -46,11 +45,6 @@ class FileSystemTest < Minitest::Test
   end
 
   def test_file_system
-    FleetCaptain::FileSystem.new(test_files_dir)
-  end
-
-  def files_on_disk
-    Dir.entries(test_files_dir)
-       .reject { |f| f.start_with? '.' }
+    FleetCaptain::TestFileSystem.new(test_files_dir)
   end
 end

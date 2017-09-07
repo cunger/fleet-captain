@@ -84,6 +84,18 @@ post '/files/:file_name/edit' do |file_name|
   redirect_with_message '/', "'#{file_name}' was updated."
 end
 
+# Duplicate file
+
+post '/files/:file_name/duplicate' do |file_name|
+  restrict_to_signed_in_user
+
+  file = fetch file_name
+  new_file_name = 'copy_of_' + file.name
+  @file_system.create! new_file_name
+  @file_system.fetch(new_file_name).content = file.content
+  redirect_with_message '/', "'#{file_name}' was duplicated as '#{new_file_name}'."
+end
+
 # Delete file
 
 post '/files/:file_name/delete' do |file_name|

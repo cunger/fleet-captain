@@ -8,7 +8,7 @@ module FleetCaptain
   # The FileSystem is responsible for knowing the files in its path,
   # as well as for creating and deleting files.
   # When asked to fetch a particular file, it will wrap it using FileWrapper.
-   
+
   class FileSystem
     attr_reader :path
 

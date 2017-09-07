@@ -7,6 +7,9 @@
       - if @user.signed_in?
         %a(href="/files/#{file}/edit")
           (EDIT)
+        %form(method="post" action="/files/#{file}/duplicate" class="inline")
+          %button(type="submit" name="duplicate")
+            DUPLICATE
         %form(method="post" action="/files/#{file}/delete" class="inline")
           %button(type="submit" name="delete")
             DELETE

@@ -3,6 +3,7 @@ ENV['RACK_ENV'] = 'test'
 require 'minitest/autorun'
 require 'rack/test'
 
+require_relative 'test_file_system'
 require_relative '../fleet_captain'
 
 class AppTest < Minitest::Test
@@ -12,16 +13,26 @@ class AppTest < Minitest::Test
     Sinatra::Application
   end
 
+  def setup
+    @test = test_file_system
+  end
+
+  def teardown
+    # Clean up test files directory on disk
+    # by removing all temporarily created files
+    @test.clean_up!
+  end
+
   def test_landing_page
     check_get_to '/' do
-      test_file_system.files.each do |file|
+      @test.file_system.files.each do |file|
         assert_includes last_response.body, file
       end
     end
   end
 
   def test_file_routes
-    test_file_system.files.each do |file|
+    @test.file_system.files.each do |file|
       get_is_ok "/files/#{file}"
     end
   end
@@ -63,6 +74,12 @@ class AppTest < Minitest::Test
     get_is_ok '/files/new_file.txt'
   end
 
+  def test_duplicate_file
+    post_to '/files/test.txt/duplicate',
+            shows_message: "'test.txt' was duplicated as 'copy_of_test.txt'."
+    get_is_ok '/files/copy_of_test.txt'
+  end
+
   def test_delete_file
     # create it
     get_is_ok  '/files/new'
@@ -100,7 +117,7 @@ class AppTest < Minitest::Test
 
   def test_restricted_access
     # for a guest user...
-    test_file_system.files.each do |file|
+    @test.file_system.files.each do |file|
       # ...EDIT and DELETE are not allowed
       get "/files/#{file}/edit"
       assert_equal 403, last_response.status
@@ -108,7 +125,7 @@ class AppTest < Minitest::Test
       assert_equal 403, last_response.status
     end
     # ...but SHOW is fine
-    test_file_system.files.each do |file|
+    @test.file_system.files.each do |file|
       get "/files/#{file}"
       assert last_response.ok?
     end
@@ -155,6 +172,6 @@ class AppTest < Minitest::Test
   end
 
   def test_file_system
-    FleetCaptain::FileSystem.new(test_files_dir)
+    FleetCaptain::TestFileSystem.new(test_files_dir)
   end
 end
